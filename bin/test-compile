@@ -23,6 +23,8 @@ git branch -r | cat
 
 git branch | cat
 
+git remote -v 
+
 # Fetch 
 git fetch --all
 
