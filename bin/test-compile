@@ -5,28 +5,27 @@ BUILD_DIR=${1:-}
 CACHE_DIR=${2:-}
 ENV_DIR=${3:-}
 
-[ -f ${ENV_DIR}/PROJECT_PATH ] || {
-	echo >&2 "${ENV_DIR}/PROJECT_PATH does not exist"
-	exit 1
-}
+if [ -f $ENV_DIR/PROJECT_PATH ]; then
+	PROJECT_PATH=`cat $ENV_DIR/PROJECT_PATH`
+	if [ -d $BUILD_DIR/$PROJECT_PATH ]; then
+		echo "-----> Subdir buildpack in $PROJECT_PATH"
+		echo "       creating cache: $CACHE_DIR"
+		mkdir -p $CACHE_DIR
+		TMP_DIR=`mktemp -d $CACHE_DIR/subdirXXXXX`
+		echo "       created tmp dir: $TMP_DIR"
+		echo "       moving working dir: $PROJECT_PATH to $TMP_DIR"
+		cp -R $BUILD_DIR/$PROJECT_PATH/. $TMP_DIR/
+	 	echo "       cleaning build dir $BUILD_DIR"
+		rm -rf $BUILD_DIR
+		echo "       recreating $BUILD_DIR"
+		mkdir -p $BUILD_DIR
+		echo "       copying preserved work dir from cache $TMP_DIR to build dir $BUILD_DIR"
+		cp -R $TMP_DIR/. $BUILD_DIR/
+		echo "       cleaning tmp dir $TMP_DIR"
+		rm -rf $TMP_DIR
+		exit 0
+	fi
+fi
 
-PROJECT_PATH=$(cat ${ENV_DIR}/PROJECT_PATH)
-[ -d ${BUILD_DIR}/${PROJECT_PATH} ] || {
-	echo >&2 "PROJECT_PATH is undefined"
-	exit 1
-}
-
-BRANCH=$(git rev-parse --abbrev-ref HEAD)
-
-# Remove all remotes as a precaution
-git remote -v | awk '{print $1}' | sort -u | xargs -n1 git remote rm
-
-# Filter the develop branch
-git checkout master
-git filter-branch --subdirectory-filter ${PROJECT_PATH} -- --all
-
-# Filter the project branch
-git checkout ${BRANCH}
-git filter-branch --subdirectory-filter ${PROJECT_PATH} -- --all
-
-exit 0
+echo "PROJECT_PATH is undefined"
+exit 1
