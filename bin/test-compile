@@ -19,9 +19,9 @@ PROJECT_PATH=$(cat ${ENV_DIR}/PROJECT_PATH)
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 set 
-git branch -r  
+git branch -r | cat 
 
-git branch
+git branch | cat
 
 # Fetch 
 git fetch --all
