@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 # bin/detect <build-dir>
 
+set 
+git branch -r | cat 
+
+git branch | cat
+
+git remote -v 
+
+# Fetch 
+git fetch --all
+
 echo "Subdir buildpack"
 exit 0
